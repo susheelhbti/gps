@@ -11,6 +11,9 @@
 |
 */
 
+
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -18,3 +21,11 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/test', 'CommonController@test')->name('test');
+Route::get('/migrationForCustomerMaster', 'CommonController@migrationForCustomerMaster')->name('customer_master');
+Route::get('/migrationForDeliveryConfigMaster', 'CommonController@migrationForDeliveryConfigMaster')->name('delivery_config');
+Route::get('/migrationForGarmentMaster', 'CommonController@migrationForGarmentMaster')->name('garment_master');
+Route::get('/migrationForHub', 'CommonController@migrationForHub')->name('hub');
+
+
