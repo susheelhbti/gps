@@ -54,51 +54,51 @@ class CommonController extends Controller
     public function migrationForCustomerMaster()
     {
         $customer_details = array();
-        $customers = DB::select("select * from customers limit 50000");
-   //echo "<pre>";print_r($customers);die;
 
-        foreach ($customers as $key => $value){
+        $customers = DB::select("select COUNT(id) as no_of_records from customers");
+        $total_no_of_records = $customers[0]->no_of_records;
 
-            $customer_details[$key]['cm_name']          = empty($value->name) ? '' : $value->name ;
-            $customer_details[$key]['cm_email']         = empty($value->email) ? '' : $value->email ;
-            $customer_details[$key]['cm_phone']         = empty($value->phone) ? '' : $value->phone ;
-            $customer_details[$key]['cm_pincode']       = empty($value->pincode) ? '' : $value->pincode ;
-            $customer_details[$key]['cm_address']       = empty($value->address) ? '' : $value->address ;
-            $customer_details[$key]['cm_created_on']    = date('Y-m-d H:i:s');
-            $customer_details[$key]['cm_weight']        = 0.0;
-            $customer_details[$key]['cm_updated_by']    = 1;
-            $customer_details[$key]['cm_updated_on']    = date('Y-m-d H:i:s');
-            $customer_details[$key]['cm_created_by']    = 1;
-            $customer_details[$key]['cm_is_deleted']    = 0;
+        While($total_no_of_records != 0){
 
+             $customers = DB::select("select * from customers where migration_flag='0' limit 1");
 
-        }
-     //   echo "<pre>";print_r($customer_details);die;
-//        $customer_details[0]['cm_name']          = 'vikas';
-//        $customer_details[0]['cm_email']         = 'vikaspatel0123@gmail.com';
-//        $customer_details[0]['cm_phone']         = 8962357899;
-//        $customer_details[0]['cm_pincode']       =  '';
-//        $customer_details[0]['cm_address']       = 'sanatacruz';
-//        $customer_details[0]['cm_created_on']    = date('Y-m-d H:i:s');
-//        $customer_details[0]['cm_weight']        = 0.0;
-//        $customer_details[0]['cm_updated_by']    = 1;
-//        $customer_details[0]['cm_updated_on']    = date('Y-m-d H:i:s');
-//        $customer_details[0]['cm_created_by']    = 1;
-//        $customer_details[0]['cm_is_deleted']    = 0;
+            foreach ($customers as $key => $value) {
+                $customer_details[$key]['cm_id'] = empty($value->id) ? '' : $value->id;
+                $customer_details[$key]['cm_name'] = empty($value->name) ? '' : $value->name;
+                $customer_details[$key]['cm_email'] = empty($value->email) ? '' : $value->email;
+                $customer_details[$key]['cm_phone'] = empty($value->phone) ? '' : $value->phone;
+                $customer_details[$key]['cm_pincode'] = empty($value->pincode) ? '' : $value->pincode;
+                $customer_details[$key]['cm_address'] = empty($value->address) ? '' : $value->address;
+                $customer_details[$key]['cm_created_on'] = date('Y-m-d H:i:s');
+                $customer_details[$key]['cm_weight'] = 0.0;
+                $customer_details[$key]['cm_updated_by'] = 1;
+                $customer_details[$key]['cm_updated_on'] = date('Y-m-d H:i:s');
+                $customer_details[$key]['cm_created_by'] = 1;
+                $customer_details[$key]['cm_is_deleted'] = 0;
 
-        $customer_details = json_decode(json_encode($customer_details), true);
+            }
 
-        //remove die;
+            $total_no_of_records--;
 
-         if(!empty($customer_details)){
-                $result = $this->Common->InsertBulkData('customer_master',$customer_details,'', 'mysql2');
+            $customer_details = json_decode(json_encode($customer_details), true);
 
-                if(is_array($result)){
+            //remove die;
+            if (!empty($customer_details)) {
+                $result = $this->Common->InsertBulkData('customer_master', $customer_details, 'cm_id', 'mysql2');
+
+                $update = $this->Common->dataUpdateOld('customers',['id'=>$customers[0]->id],[
+                    'migration_flag' => 1],'mysql');
+
+                if (is_array($result)) {
                     echo "<pre>";
-                    print_r($result);die;
-                }else{
+                    print_r($result);
+                } else {
                     echo $result;
                 }
+            }
+            else{
+                echo "empty customer";
+            }
         }
 
     }
@@ -119,8 +119,8 @@ class CommonController extends Controller
         //remove die
         //die;
         if(!empty($delivery_config)){
-            $result = $this->Common->InsertBulkData('delivery_config',$delivery_config,'', 'mysql2');
-            echo $result;
+            $result = $this->Common->InsertBulkData('delivery_config',$delivery_config,'id', 'mysql2');
+            print_r($result);
         }
     }
 

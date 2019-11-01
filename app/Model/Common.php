@@ -157,7 +157,11 @@ class Common extends Model
             DB::connection($con)->beginTransaction();
             DB::connection($con)->statement($query);
             DB::connection($con)->commit();
-            return  $result = "Migration Completed";
+            if($id != '')
+                $lastIds = DB::connection($con)->table($table)->select()->count($id);
+                $result['msg'] = "Migrating..";
+                $result['id'] = $lastIds;
+            return $result;
         } catch (\Illuminate\Database\QueryException $ex) {
             Log::notice($ex->getMessage());
             DB::connection($con)->rollBack();
@@ -169,7 +173,7 @@ class Common extends Model
     }
 
     /**
-     * { update table data }
+     * { update table data new }
      *
      * @param      <string>  $table  The table name
      * @param      <array>  $where  The where conditions
@@ -190,6 +194,30 @@ class Common extends Model
         }
         $query->update($data);
         DB::commit();
+    }
+
+    /**
+     * { update table data old }
+     *
+     * @param      <string>  $table  The table name
+     * @param      <array>  $where  The where conditions
+     * @param      <array>  $data   The data to update into table
+     */
+    public function dataUpdateOld($table, $where, $data, $con)
+    {
+        DB::connection($con)->beginTransaction();
+        $query = DB::table($table);
+
+        if (is_array($where)) {
+            foreach ($where as $key => $value) {
+                $query = $query->where($key, $value);
+            }
+
+        } else {
+            $query = $query->where($where);
+        }
+        $query->update($data);
+        DB::connection($con)->commit();
     }
 
 
